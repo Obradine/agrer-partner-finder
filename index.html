@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGRER — Partner Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:     #1A2E3B;
+    --green:    #2E7D32;
+    --green2:   #4CAF50;
+    --local:    #1565C0;
+    --regional: #6A1B9A;
+    --intl:     #BF360C;
+    --bg:       #F4F6F8;
+    --card:     #FFFFFF;
+    --border:   #E2E8F0;
+    --text:     #2C3E50;
+    --muted:    #7F8C8D;
+    --radius:   12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--dark);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: #90CAF9;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .header-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    margin: 0 8px;
+  }
+  .header-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    max-width: 720px;
+    margin: 48px auto;
+    padding: 0 24px;
+    width: 100%;
+  }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── FIELDS ── */
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237F8C8D' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  input[type="text"] {
+    background-image: none;
+  }
+  select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--dark);
+  }
+
+  /* ── SLIDERS ── */
+  .sliders-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .slider-item { }
+
+  .slider-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .slider-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .slider-name.local    { color: var(--local); }
+  .slider-name.regional { color: var(--regional); }
+  .slider-name.intl     { color: var(--intl); }
+
+  .slider-value {
+    font-size: 18px;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: right;
+  }
+  .slider-value.local    { color: var(--local); }
+  .slider-value.regional { color: var(--regional); }
+  .slider-value.intl     { color: var(--intl); }
+
+  input[type="range"] {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"].local {
+    background: linear-gradient(to right, var(--local) 0%, var(--local) var(--pct, 100%), var(--border) var(--pct, 100%));
+  }
+  input[type="range"].regional {
+    background: linear-gradient(to right, var(--regional) 0%, var(--regional) var(--pct, 100%), var(--border) var(--pct, 100%));
+  }
+  input[type="range"].intl {
+    background: linear-gradient(to right, var(--intl) 0%, var(--intl) var(--pct, 100%), var(--border) var(--pct, 100%));
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid currentColor;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  input[type="range"].local::-webkit-slider-thumb    { border-color: var(--local); }
+  input[type="range"].regional::-webkit-slider-thumb { border-color: var(--regional); }
+  input[type="range"].intl::-webkit-slider-thumb     { border-color: var(--intl); }
+
+  .slider-hint {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  /* ── SUBMIT ── */
+  .submit-area {
+    margin-top: 8px;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background: var(--dark);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  button[type="submit"]:hover  { background: #243544; }
+  button[type="submit"]:active { transform: scale(0.99); }
+  button[type="submit"]:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── STATUS ── */
+  #status {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: none;
+  }
+  #status.loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #EEF4FF;
+    color: var(--local);
+    border: 1px solid #BBDEFB;
+  }
+  #status.success {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #E8F5E9;
+    color: var(--green);
+    border: 1px solid #C8E6C9;
+  }
+  #status.error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #FFCDD2;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid #BBDEFB;
+    border-top-color: var(--local);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo-text">AGRER</div>
+    <div class="logo-sub">Partner Intelligence</div>
+  </div>
+  <div class="header-divider"></div>
+  <div class="header-title">Partner Finder</div>
+</header>
+
+<main>
+  <h1 class="page-title">Nouvelle analyse</h1>
+  <p class="page-subtitle">Renseigne les paramètres pour générer une shortlist de partenaires potentiels.</p>
+
+  <form id="form">
+
+    <!-- Contexte AO -->
+    <div class="card">
+      <div class="card-title">Contexte de l'AO</div>
+
+      <div class="field">
+        <label for="pays">Pays cible</label>
+        <select id="pays" name="pays" required>
+          <option value="" disabled selected>Sélectionner un pays…</option>
+          <option value="SN">Sénégal</option>
+          <option value="CI">Côte d'Ivoire</option>
+          <option value="BF">Burkina Faso</option>
+          <option value="ML">Mali</option>
+          <option value="GN">Guinée</option>
+          <option value="TG">Togo</option>
+          <option value="BJ">Bénin</option>
+          <option value="NE">Niger</option>
+          <option value="CM">Cameroun</option>
+          <option value="MR">Mauritanie</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="thematique">Thématique principale</label>
+        <select id="thematique" name="thematique" required>
+          <option value="" disabled selected>Sélectionner une thématique…</option>
+          <option value="agro">Agriculture</option>
+          <option value="env">Environnement</option>
+          <option value="energy">Énergie</option>
+          <option value="eau">Eau</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="champ_libre">Description de la mission <span style="color:var(--muted);font-weight:400">(champ libre)</span></label>
+        <input type="text" id="champ_libre" name="champ_libre"
+          placeholder="ex : chaînes de valeur agricoles, petits producteurs, Sénégal…" required>
+      </div>
+    </div>
+
+    <!-- Sélection rapport -->
+    <div class="card">
+      <div class="card-title">Sociétés dans le rapport final</div>
+
+      <div class="sliders-grid">
+        <div class="slider-item">
+          <div class="slider-label">
+            <span class="slider-name local">LOCAL</span>
+            <span class="slider-value local" id="val-local">5</span>
+          </div>
+          <input type="range" class="local" id="top_local" name="top_local_rapport"
+            min="0" max="5" value="5" step="1">
+          <div class="slider-hint">Pays cible</div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-label">
+            <span class="slider-name regional">RÉGIONAL</span>
+            <span class="slider-value regional" id="val-regional">5</span>
+          </div>
+          <input type="range" class="regional" id="top_regional" name="top_regional_rapport"
+            min="0" max="5" value="5" step="1">
+          <div class="slider-hint">Zone Afrique de l'Ouest</div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-label">
+            <span class="slider-name intl">INTL</span>
+            <span class="slider-value intl" id="val-intl">3</span>
+          </div>
+          <input type="range" class="intl" id="top_intl" name="top_international_rapport"
+            min="0" max="5" value="3" step="1">
+          <div class="slider-hint">Hors zone</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-area">
+      <button type="submit" id="btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Lancer l'analyse
+      </button>
+    </div>
+
+  </form>
+
+  <div id="status">
+    <div class="spinner" id="spinner"></div>
+    <span class="status-icon" id="status-icon" style="display:none"></span>
+    <span id="status-text"></span>
+  </div>
+
+</main>
+
+<footer>AGRER — Usage interne · Partner Intelligence MVP</footer>
+
+<script>
+  // ── Sliders ──
+  function initSlider(inputId, valueId) {
+    var input = document.getElementById(inputId);
+    var valueEl = document.getElementById(valueId);
+    function update() {
+      valueEl.textContent = input.value;
+      var pct = (input.value / input.max) * 100;
+      input.style.setProperty('--pct', pct + '%');
+    }
+    input.addEventListener('input', update);
+    update();
+  }
+  initSlider('top_local',    'val-local');
+  initSlider('top_regional', 'val-regional');
+  initSlider('top_intl',     'val-intl');
+
+  // ── Form submit ──
+  var WEBHOOK_URL = 'https://automation.obradine.cloud/webhook/wf2-agrer';
+
+  document.getElementById('form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var btn    = document.getElementById('btn');
+    var status = document.getElementById('status');
+
+    var payload = {
+      pays:                   document.getElementById('pays').value,
+      thematique:             document.getElementById('thematique').value,
+      champ_libre:            document.getElementById('champ_libre').value,
+      top_local_rapport:      parseInt(document.getElementById('top_local').value),
+      top_regional_rapport:   parseInt(document.getElementById('top_regional').value),
+      top_international_rapport: parseInt(document.getElementById('top_intl').value),
+    };
+
+    // UI loading
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="border-color:#555;border-top-color:#fff;width:16px;height:16px"></div> Analyse en cours…';
+    status.className = 'loading';
+    status.style.display = 'flex';
+    document.getElementById('spinner').style.display = 'block';
+    document.getElementById('status-icon').style.display = 'none';
+    document.getElementById('status-text').textContent = 'Démarrage de l\'analyse — cela peut prendre 2 à 3 minutes…';
+
+    try {
+      var res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        status.className = 'success';
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('status-icon').style.display = 'block';
+        document.getElementById('status-icon').textContent = '✅';
+        document.getElementById('status-text').textContent = 'Analyse lancée avec succès ! Le rapport sera disponible dans Google Drive dans quelques minutes.';
+      } else {
+        throw new Error('Erreur serveur : ' + res.status);
+      }
+    } catch(err) {
+      status.className = 'error';
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('status-icon').style.display = 'block';
+      document.getElementById('status-icon').textContent = '❌';
+      document.getElementById('status-text').textContent = 'Erreur : ' + err.message + '. Vérifier que n8n est actif.';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Lancer l\'analyse';
+  });
+</script>
+
+</body>
+</html>
