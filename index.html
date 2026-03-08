@@ -127,7 +127,7 @@
     margin-bottom: 8px;
   }
 
-  select, input[type="text"] {
+  select, input[type="text"], input[type="number"], textarea {
     width: 100%;
     padding: 11px 14px;
     border: 1.5px solid var(--border);
@@ -137,86 +137,71 @@
     color: var(--text);
     background: #fff;
     transition: border-color 0.2s;
+  }
+  select {
     appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237F8C8D' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
   }
-  input[type="text"] {
-    background-image: none;
-  }
-  select:focus, input[type="text"]:focus {
+  select:focus, input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
     outline: none;
     border-color: var(--dark);
   }
 
-  /* ── SLIDERS ── */
-  .sliders-grid {
+  /* ── TEXTAREA ── */
+  textarea {
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.6;
+  }
+  .textarea-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ── NUMBER INPUTS GRID ── */
+  .numbers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
   }
 
-  .slider-item { }
+  .number-item {}
 
-  .slider-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .slider-name {
+  .number-label {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: block;
   }
-  .slider-name.local    { color: var(--local); }
-  .slider-name.regional { color: var(--regional); }
-  .slider-name.intl     { color: var(--intl); }
+  .number-label.local    { color: var(--local); }
+  .number-label.regional { color: var(--regional); }
+  .number-label.intl     { color: var(--intl); }
 
-  .slider-value {
-    font-size: 18px;
+  input[type="number"] {
+    text-align: center;
+    font-size: 22px;
     font-weight: 600;
-    min-width: 24px;
-    text-align: right;
+    padding: 10px;
+    border-radius: 8px;
+    -moz-appearance: textfield;
   }
-  .slider-value.local    { color: var(--local); }
-  .slider-value.regional { color: var(--regional); }
-  .slider-value.intl     { color: var(--intl); }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+  input[type="number"].local    { color: var(--local);    border-color: #BBDEFB; }
+  input[type="number"].regional { color: var(--regional); border-color: #E1BEE7; }
+  input[type="number"].intl     { color: var(--intl);     border-color: #FFCCBC; }
+  input[type="number"].local:focus    { border-color: var(--local); }
+  input[type="number"].regional:focus { border-color: var(--regional); }
+  input[type="number"].intl:focus     { border-color: var(--intl); }
 
-  input[type="range"] {
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    appearance: none;
-    -webkit-appearance: none;
-    outline: none;
-    cursor: pointer;
-  }
-  input[type="range"].local {
-    background: linear-gradient(to right, var(--local) 0%, var(--local) var(--pct, 100%), var(--border) var(--pct, 100%));
-  }
-  input[type="range"].regional {
-    background: linear-gradient(to right, var(--regional) 0%, var(--regional) var(--pct, 100%), var(--border) var(--pct, 100%));
-  }
-  input[type="range"].intl {
-    background: linear-gradient(to right, var(--intl) 0%, var(--intl) var(--pct, 100%), var(--border) var(--pct, 100%));
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #fff;
-    border: 2px solid currentColor;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  }
-  input[type="range"].local::-webkit-slider-thumb    { border-color: var(--local); }
-  input[type="range"].regional::-webkit-slider-thumb { border-color: var(--regional); }
-  input[type="range"].intl::-webkit-slider-thumb     { border-color: var(--intl); }
-
-  .slider-hint {
+  .number-hint {
     font-size: 10px;
     color: var(--muted);
     margin-top: 6px;
@@ -224,9 +209,7 @@
   }
 
   /* ── SUBMIT ── */
-  .submit-area {
-    margin-top: 8px;
-  }
+  .submit-area { margin-top: 8px; }
 
   button[type="submit"] {
     width: 100%;
@@ -359,9 +342,17 @@
       </div>
 
       <div class="field">
-        <label for="champ_libre">Description de la mission <span style="color:var(--muted);font-weight:400">(champ libre)</span></label>
-        <input type="text" id="champ_libre" name="champ_libre"
-          placeholder="ex : chaînes de valeur agricoles, petits producteurs, Sénégal…" required>
+        <label for="champ_libre">
+          Description de la mission
+          <span style="color:var(--muted);font-weight:400">(champ libre)</span>
+        </label>
+        <textarea
+          id="champ_libre"
+          name="champ_libre"
+          placeholder="Décris ici le contexte de l'AO, les composantes, les types de missions recherchées, le profil partenaire souhaité…&#10;&#10;Ex : L'État du Sénégal cherche un cabinet pour la supervision des travaux hydrauliques dans le cadre du projet Nanija-Bolong…"
+          required
+        ></textarea>
+        <div class="textarea-hint">💡 Plus le contexte est précis, plus l'analyse sera pertinente. Utilisez Entrée pour les sauts de ligne.</div>
       </div>
     </div>
 
@@ -369,35 +360,26 @@
     <div class="card">
       <div class="card-title">Sociétés dans le rapport final</div>
 
-      <div class="sliders-grid">
-        <div class="slider-item">
-          <div class="slider-label">
-            <span class="slider-name local">LOCAL</span>
-            <span class="slider-value local" id="val-local">5</span>
-          </div>
-          <input type="range" class="local" id="top_local" name="top_local_rapport"
-            min="0" max="5" value="5" step="1">
-          <div class="slider-hint">Pays cible</div>
+      <div class="numbers-grid">
+        <div class="number-item">
+          <span class="number-label local">LOCAL</span>
+          <input type="number" class="local" id="top_local" name="top_local_rapport"
+            min="1" max="5" value="5" required>
+          <div class="number-hint">Pays cible</div>
         </div>
 
-        <div class="slider-item">
-          <div class="slider-label">
-            <span class="slider-name regional">RÉGIONAL</span>
-            <span class="slider-value regional" id="val-regional">5</span>
-          </div>
-          <input type="range" class="regional" id="top_regional" name="top_regional_rapport"
-            min="0" max="5" value="5" step="1">
-          <div class="slider-hint">Zone Afrique de l'Ouest</div>
+        <div class="number-item">
+          <span class="number-label regional">RÉGIONAL</span>
+          <input type="number" class="regional" id="top_regional" name="top_regional_rapport"
+            min="1" max="5" value="5" required>
+          <div class="number-hint">Zone Afrique de l'Ouest</div>
         </div>
 
-        <div class="slider-item">
-          <div class="slider-label">
-            <span class="slider-name intl">INTL</span>
-            <span class="slider-value intl" id="val-intl">3</span>
-          </div>
-          <input type="range" class="intl" id="top_intl" name="top_international_rapport"
-            min="0" max="5" value="3" step="1">
-          <div class="slider-hint">Hors zone</div>
+        <div class="number-item">
+          <span class="number-label intl">INTL</span>
+          <input type="number" class="intl" id="top_intl" name="top_international_rapport"
+            min="1" max="5" value="3" required>
+          <div class="number-hint">Hors zone</div>
         </div>
       </div>
     </div>
@@ -425,21 +407,15 @@
 <footer>AGRER — Usage interne · Partner Intelligence MVP</footer>
 
 <script>
-  // ── Sliders ──
-  function initSlider(inputId, valueId) {
-    var input = document.getElementById(inputId);
-    var valueEl = document.getElementById(valueId);
-    function update() {
-      valueEl.textContent = input.value;
-      var pct = (input.value / input.max) * 100;
-      input.style.setProperty('--pct', pct + '%');
-    }
-    input.addEventListener('input', update);
-    update();
-  }
-  initSlider('top_local',    'val-local');
-  initSlider('top_regional', 'val-regional');
-  initSlider('top_intl',     'val-intl');
+  // ── Validation inputs numériques ──
+  ['top_local', 'top_regional', 'top_intl'].forEach(function(id) {
+    var input = document.getElementById(id);
+    input.addEventListener('change', function() {
+      var val = parseInt(this.value);
+      if (isNaN(val) || val < 1) this.value = 1;
+      if (val > 5) this.value = 5;
+    });
+  });
 
   // ── Form submit ──
   var WEBHOOK_URL = 'https://automation.obradine.cloud/webhook/wf2-agrer';
@@ -451,11 +427,11 @@
     var status = document.getElementById('status');
 
     var payload = {
-      pays:                   document.getElementById('pays').value,
-      thematique:             document.getElementById('thematique').value,
-      champ_libre:            document.getElementById('champ_libre').value,
-      top_local_rapport:      parseInt(document.getElementById('top_local').value),
-      top_regional_rapport:   parseInt(document.getElementById('top_regional').value),
+      pays:                      document.getElementById('pays').value,
+      thematique:                document.getElementById('thematique').value,
+      champ_libre:               document.getElementById('champ_libre').value,
+      top_local_rapport:         parseInt(document.getElementById('top_local').value),
+      top_regional_rapport:      parseInt(document.getElementById('top_regional').value),
       top_international_rapport: parseInt(document.getElementById('top_intl').value),
     };
 
