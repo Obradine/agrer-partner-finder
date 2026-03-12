@@ -1,0 +1,734 @@
+{
+  "name": "AGRER — RADAR - WF3 - ANALYSE",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "champ_libre",
+              "name": "champ_libre",
+              "value": "={{$input.first().json.champ_libre}}",
+              "type": "string",
+              "description": "Contexte spécifique de l'AO — ex: chaînes de valeur agricole, gestion des terres, énergie solaire..."
+            },
+            {
+              "id": "top_local",
+              "name": "top_local",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "top_regional",
+              "name": "top_regional",
+              "value": 7,
+              "type": "number"
+            },
+            {
+              "id": "top_international",
+              "name": "top_international",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "sheet_scoring_id",
+              "name": "sheet_scoring_id",
+              "value": "1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+              "type": "string"
+            },
+            {
+              "id": "sheet_output_id",
+              "name": "sheet_output_id",
+              "value": "1KZXLMbxK3-pc-Tk8tIeepkpUSKvVeE4eZ2Sl1yzsayE",
+              "type": "string"
+            },
+            {
+              "id": "openai_key",
+              "name": "openai_key",
+              "value": "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",
+              "type": "string"
+            },
+            {
+              "id": "brave_key",
+              "name": "brave_key",
+              "value": "BSAaopkLU_9UK4q7_IDmL3obqwTJ5N8",
+              "type": "string"
+            },
+            {
+              "id": "1fb824c5-fc56-44ab-89d2-f633f9b81ad4",
+              "name": "top_local_rapport",
+              "value": "={{$input.first().json.top_local_rapport}}",
+              "type": "number"
+            },
+            {
+              "id": "ebbe352d-bc7e-45d3-bfa1-0d3644a8d181",
+              "name": "top_regional_rapport",
+              "value": "={{$input.first().json.top_regional_rapport}}",
+              "type": "number"
+            },
+            {
+              "id": "9695ee8e-7cf6-43ce-94b4-6bda4cc14a9b",
+              "name": "top_international_rapport",
+              "value": "={{$input.first().json.top_international_rapport}}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e98d4d4c-17d7-46de-939a-e5e740d506fc",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1936,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1158356104,
+          "mode": "list",
+          "cachedResultName": "Scoring",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o/edit#gid=1158356104"
+        },
+        "options": {}
+      },
+      "id": "5b658292-5c62-4a5a-b052-ecee159bdbc6",
+      "name": "Lire Scoring",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1728,
+        144
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Config').first().json;\nconst rows = $input.all().map(i => i.json);\n\nconst topLocal = config.top_local || 10;\nconst topRegional = config.top_regional || 7;\nconst topIntl = config.top_international || 5;\n\n// Filtrer les lignes de séparateur (pas de société)\nconst dataRows = rows.filter(r => r.Société && r.Bucket && ['LOCAL','REGIONAL','INTERNATIONAL'].includes(r.Bucket));\n\n// Top N par bucket\nconst bucketCount = {};\nconst selected = [];\n\nfor (const row of dataRows) {\n  const bucket = row.Bucket;\n  const limit = bucket === 'LOCAL' ? topLocal : bucket === 'REGIONAL' ? topRegional : topIntl;\n  bucketCount[bucket] = (bucketCount[bucket] || 0) + 1;\n  if (bucketCount[bucket] <= limit) {\n    selected.push({\n      bucket,\n      rang: bucketCount[bucket],\n      societe: row.Société,\n      pays: row.Pays,\n      score_bm: parseFloat(row['Score Total']) || 0,\n      nb_awards: parseInt(row['Nb Awards']) || 0,\n      nb_projets: parseInt(row['Nb Projets']) || 0,\n      dernier_award: row['Dernier Award'] || '',\n      justification_bm: row['Justification (top 3 awards)'] || '',\n      urls_bm: row['URLs'] || '',\n      champ_libre: config.champ_libre,\n      sheet_output_id: config.sheet_output_id,\n      openai_key: config.openai_key,\n      brave_key: config.brave_key\n    });\n  }\n}\n\nreturn selected.map(s => ({ json: s }));"
+      },
+      "id": "792d1ea3-e10a-4a2d-aeeb-4d665e7cfd15",
+      "name": "Filtrer Top N",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function buildAwardsDetail(justif, urls) {\n  if (!justif || !urls) return '';\n  const urlList = urls.split('|').map(u => u.trim()).filter(Boolean);\n  const pattern = /\\[(\\d{4}-\\d{2})\\]\\s([^\\[|]+)/g;\n  let match;\n  const awards = [];\n  let i = 0;\n  while ((match = pattern.exec(justif)) !== null) {\n    awards.push({\n      date: match[1],\n      titre: match[2].trim().replace(/\\s*\\|.*$/, ''),\n      url: urlList[i] || ''\n    });\n    i++;\n  }\n  return JSON.stringify(awards);\n}\n\nconst item = $('Prompt').item.json;\nconst openaiResponse = $json;\n\nlet analysis = {};\ntry {\n  const output = openaiResponse?.output || [];\n  const msgBlock = output.find(b => b.type === 'message');\n  const content = msgBlock?.content?.find(c => c.type === 'output_text')?.text || '{}';\n  const clean = content.replace(/```json|```/g, '').trim();\n  analysis = JSON.parse(clean);\n} catch(e) {\n  analysis = {\n    description: 'Analyse non disponible',\n    analyse: '',\n    points_forts: [],\n    domaines: [],\n    fit_level: 'Unclear',\n    score_pertinence: 0,\n    red_flags: [],\n    site_officiel: null,\n    email_contact: null,\n    linkedin: null,\n    confidence: 'Low'\n  };\n}\n\nreturn {\n  json: {\n    Bucket: item.bucket,\n    Rang: item.rang,\n    Société: item.societe,\n    Pays: item.pays,\n    'Score BM': item.score_bm,\n    'Score Pertinence': analysis.score_pertinence || 0,\n    'Fit Level': analysis.fit_level || 'Unclear',\n    Confiance: analysis.confidence || 'Low',\n    Description: analysis.description || '',\n    Analyse: analysis.analyse || '',\n    'Points Forts': Array.isArray(analysis.points_forts) ? analysis.points_forts.join(' | ') : '',\n    Domaines: Array.isArray(analysis.domaines) ? analysis.domaines.join(', ') : '',\n    'Red Flags': Array.isArray(analysis.red_flags) ? analysis.red_flags.join(' | ') : '',\n    'Site Web': analysis.site_officiel || '',\n    Contact: analysis.email_contact || '',\n    LinkedIn: analysis.linkedin || '',\n    'Sources BM': item.urls_bm || '',\n    'Awards Detail': buildAwardsDetail(item.justification_bm, item.urls_bm),\n  }\n};"
+      },
+      "id": "55730362-1ad9-4f45-89c9-05bcdbccc423",
+      "name": "Assembler Résultat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1KZXLMbxK3-pc-Tk8tIeepkpUSKvVeE4eZ2Sl1yzsayE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Analyse",
+          "mode": "name"
+        }
+      },
+      "id": "54312c63-f559-452d-b218-24324f15e2ff",
+      "name": "Vider Analyse",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -48,
+        144
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1KZXLMbxK3-pc-Tk8tIeepkpUSKvVeE4eZ2Sl1yzsayE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Résumé Run",
+          "mode": "name"
+        }
+      },
+      "id": "320b429b-558b-40b9-a2b3-3232b25fae3e",
+      "name": "Vider Résumé",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        96,
+        144
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all().map(i => i.json);\nconst config = $('Config').first().json;\n\n// Trier par bucket puis score final\nconst bucketOrder = { LOCAL: 0, REGIONAL: 1, INTERNATIONAL: 2 };\nallItems.sort((a,b) => {\n  if (a.Bucket !== b.Bucket) return bucketOrder[a.Bucket] - bucketOrder[b.Bucket];\n  if (b['Score Pertinence'] !== a['Score Pertinence']) return b['Score Pertinence'] - a['Score Pertinence'];\n  return b['Score BM'] - a['Score BM'];\n});\n\n// Recalculer les rangs après tri\nconst bucketRank = {};\nfor (const item of allItems) {\n  bucketRank[item.Bucket] = (bucketRank[item.Bucket] || 0) + 1;\n  item.Rang = bucketRank[item.Bucket];\n}\n\nreturn allItems.map(i => ({ json: i }));"
+      },
+      "id": "8fe10a0d-036b-4893-be4d-ff25443b175e",
+      "name": "Trier Résultats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1KZXLMbxK3-pc-Tk8tIeepkpUSKvVeE4eZ2Sl1yzsayE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Analyse",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Bucket",
+              "displayName": "Bucket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rang",
+              "displayName": "Rang",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Société",
+              "displayName": "Société",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pays",
+              "displayName": "Pays",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score BM",
+              "displayName": "Score BM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score Web",
+              "displayName": "Score Web",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score Final",
+              "displayName": "Score Final",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Confiance",
+              "displayName": "Confiance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Justification",
+              "displayName": "Justification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Domaines expertise",
+              "displayName": "Domaines expertise",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Présence géo",
+              "displayName": "Présence géo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Site Web",
+              "displayName": "Site Web",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn",
+              "displayName": "LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Awards Detail",
+              "displayName": "Awards Detail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sources BM",
+              "displayName": "Sources BM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sources Web",
+              "displayName": "Sources Web",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "896474dc-92f7-4597-87f3-6579dd5ec286",
+      "name": "Écrire Analyse",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        528,
+        144
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json;\n\nconst systemPrompt = `Tu es un analyste partenariat et business development spécialisé dans les sociétés de conseil actives sur les projets financés par les bailleurs internationaux, en particulier la Banque mondiale.\n\nTa mission est d'analyser une société candidate potentielle comme partenaire pour AGRER dans le cadre d'un appel d'offres ou d'une recherche de partenaires.\n\n## Contexte AGRER\nAGRER est une société de conseil en développement international. Elle intervient notamment sur des projets financés par des bailleurs internationaux dans des secteurs comme :\n- développement rural, agriculture et chaînes de valeur agricoles\n- environnement et gestion des ressources naturelles\n- eau, assainissement et hygiène (WASH)\n- résilience climatique\n- gouvernance sectorielle\n- études, assistance technique, supervision, appui institutionnel, faisabilité, suivi-évaluation, renforcement de capacités\n\nAGRER recherche des partenaires qui présentent idéalement :\n- expérience réelle et démontrable sur des missions comparables\n- présence locale ou régionale utile\n- crédibilité technique dans les thématiques visées\n- capacité opérationnelle sur des marchés financés par bailleurs\n- complémentarité avec AGRER\n\nL'objectif n'est PAS de faire une fiche marketing flatteuse. L'objectif est de produire une analyse utile, réaliste, concise et exploitable pour décider si la société mérite d'être considérée comme partenaire potentiel.\n\n## Règles d'analyse\n1. Base-toi sur les informations fournies + ce que tu trouves via web search\n2. Distingue les domaines réels des formulations vagues ou marketing\n3. Ne jamais inventer de faits, coordonnées ou références\n4. Signale l'incertitude via le champ confidence\n5. Évite tout texte marketing ou phrases creuses\n6. Utilise web search pour enrichir description, coordonnées et pertinence\n\n## Critères de pertinence (par ordre de priorité)\n1. Similarité des missions récentes avec la requête AGRER\n2. Cohérence sectorielle réelle\n3. Présence géographique pertinente\n4. Expérience sur marchés financés par bailleurs\n5. Complémentarité potentielle avec AGRER\n\n## Cas particuliers\n- Si awards surtout fournitures/travaux : ne pas présenter comme partenaire conseil sauf preuve contraire\n- Si awards hors sujet : l'indiquer clairement\n- Si peu d'informations : rester utile, indiquer les limites, baisser la confidence\n\n## Interdictions absolues\n- Ne jamais inventer de faits ou coordonnées\n- Ne jamais produire de texte marketing\n- Ne jamais dire qu'une société est idéale ou parfaite\n- Ne jamais sortir autre chose que le JSON demandé\n\n## Format de sortie STRICT\nRéponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans backticks, sans texte avant ou après :\n{\n  \"description\": \"qui est vraiment cette société\",\n  \"analyse\": \"pourquoi pertinente ou non pour cet AO\",\n  \"points_forts\": [\"max 3 points concrets et vérifiables\"],\n  \"domaines\": [\"domaines réellement étayés uniquement\"],\n  \"fit_level\": \"Strong | Moderate | Weak | Unclear\",\n  \"score_pertinence\": \"note de 1 à 10 basée sur la pertinence réelle pour la requête AGRER. 8-10 = très pertinent, 5-7 = pertinent mais partiel, 3-4 = peu pertinent, 1-2 = hors sujet\",\n  \"red_flags\": [\"max 3, tableau vide si aucun\"],\n  \"site_officiel\": \"string ou null\",\n  \"email_contact\": \"string ou null\",\n  \"linkedin\": \"string ou null\",\n  \"confidence\": \"High | Medium | Low\"\n}`;\n\nconst userPrompt = `Analyse la société suivante comme partenaire potentiel pour AGRER.\n\nSOCIÉTÉ : ${item.societe}\nPAYS : ${item.pays}\nCATÉGORIE : ${item.bucket}\n\nREQUÊTE AGRER :\n${item.champ_libre}\n\nHISTORIQUE BANQUE MONDIALE (36 mois) :\n- ${item.nb_awards} contrats sur ${item.nb_projets} projets BM\n- Dernier contrat : ${item.dernier_award}\n- Détail missions : ${item.justification_bm}\n- Liens awards : ${item.urls_bm}\n\nInstructions :\n- Utilise web search pour trouver site officiel, email, LinkedIn et enrichir la description\n- Base-toi en priorité sur les awards récents pour juger la pertinence\n- Retourne uniquement le JSON demandé`;\n\nconst body = {\n  model: 'gpt-4o',\n  max_output_tokens: 1000,\n  temperature: 0.3,\n  tools: [{ type: 'web_search_preview' }],\n  input: [\n    {\n      role: 'system',\n      content: systemPrompt\n    },\n    {\n      role: 'user',\n      content: userPrompt\n    }\n  ]\n};\n\nreturn { json: { ...item, openai_body: JSON.stringify(body) } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        144
+      ],
+      "id": "7d61cf45-3001-4404-b8e2-c5fee5b4c2c0",
+      "name": "Prompt"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        144
+      ],
+      "id": "35047f01-aecd-4bf4-96ef-9d3cb4df15da",
+      "name": "Wait",
+      "webhookId": "feabb191-e6fd-421c-8093-222a19c49d63"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/AKfycbz9LlLwD0ZJaI35F9pmYV7UU8OzAEN_8Nc6Z-zNdEqA7fIYymqazfFA9QwqZu9xXuhd/exec",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "top_local_rapport",
+              "value": "={{$('Config').first().json.top_local_rapport}}"
+            },
+            {
+              "name": "top_regional_rapport",
+              "value": "={{$('Config').first().json.top_regional_rapport}}"
+            },
+            {
+              "name": "top_international_rapport",
+              "value": "={{$('Config').first().json.top_international_rapport}}"
+            },
+            {
+              "name": "champ_libre",
+              "value": "={{$('Config').first().json.champ_libre}}"
+            },
+            {
+              "name": "run_date",
+              "value": "={{$now.format('yyyy-MM-dd')}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        816,
+        144
+      ],
+      "id": "b25c9f2c-7774-4568-93cc-f99bd4172804",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { done: true } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        144
+      ],
+      "id": "7e196e5d-c1fc-4ce7-8985-e50c90440a60",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "champ_libre"
+            },
+            {
+              "name": "top_local_rapport",
+              "type": "number"
+            },
+            {
+              "name": "top_regional_rapport",
+              "type": "number"
+            },
+            {
+              "name": "top_international_rapport",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2144,
+        144
+      ],
+      "id": "b358ad15-7ad2-4e12-a3ac-1b04902477d5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/responses",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.openai_body }}",
+        "options": {}
+      },
+      "id": "f626ae2d-8f47-4ef2-87a3-690523eb7f09",
+      "name": "OpenAI Analyse1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -560,
+        144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Lire Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Scoring": {
+      "main": [
+        [
+          {
+            "node": "Filtrer Top N",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrer Top N": {
+      "main": [
+        [
+          {
+            "node": "Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assembler Résultat": {
+      "main": [
+        [
+          {
+            "node": "Vider Analyse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vider Analyse": {
+      "main": [
+        [
+          {
+            "node": "Vider Résumé",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vider Résumé": {
+      "main": [
+        [
+          {
+            "node": "Trier Résultats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trier Résultats": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Analyse1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Écrire Analyse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Analyse1": {
+      "main": [
+        [
+          {
+            "node": "Assembler Résultat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Écrire Analyse": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c5fdba98-e5eb-42f6-98e6-caa6dd9d1698",
+  "meta": {
+    "instanceId": "300ae4119235cd9a4c0fd592eba274645bf15041b2d9aacd2d53bcb0b855baee"
+  },
+  "id": "PNuFQNyyO33kTMbo",
+  "tags": []
+}

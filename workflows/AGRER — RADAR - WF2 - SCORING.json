@@ -1,0 +1,1021 @@
+{
+  "name": "AGRER — RADAR - WF2 - SCORING",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "525e17d8-2aba-416b-bf67-cb4901681b8c",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"thematique\": \"{{ $json.body.thematique }}\",\n  \"pays\": \"{{ $json.body.pays }}\",\n  \"champ_libre\": \"{{ $json.body.champ_libre }}\",\n  \"top_local\": 30,\n  \"top_regional\": 20,\n  \"top_international\": 10,\n  \"top_local_rapport\": \"{{ $json.body.top_local_rapport }}\",\n  \"top_regional_rapport\": \"{{ $json.body.top_regional_rapport }}\",\n  \"top_international_rapport\": \"{{ $json.body.top_international_rapport }}\",\n  \"annees\": 3,\n  \"seuil_projet\": 55,\n  \"sheet_id\": \"1z5hHVjkjfa0fgt64tWjGYYafZFvHEOVkio3pA1ZoZn8\"\n}",
+        "options": {}
+      },
+      "id": "52d022aa-0605-444f-bf14-c95ae86a911d",
+      "name": "Config Query",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1088,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $json;\nconst thematique = (config.thematique || 'agro').toLowerCase().trim();\n\nconst MAPPINGS = {\n  agro: {\n    label: 'Agriculture & Développement Rural',\n    secteurs: [\n      { nom: 'Agriculture, Fishing & Forestry', poids: 60 },\n      { nom: 'Agricultural markets, commercialization and agri-business', poids: 55 },\n      { nom: 'Public Administration - Agriculture, Fishing & Forestry', poids: 45 },\n      { nom: 'Irrigation and Drainage', poids: 35 }\n    ],\n    themes_niveau1: [\n      { nom: 'Urban and Rural Development', poids: 40, seuil_min_pct: 50 },\n      { nom: 'Environment and Natural Resource Management', poids: 25, seuil_min_pct: 40 }\n    ],\n    sous_themes: [\n      { nom: 'Rural Development', poids: 40, seuil_min_pct: 40 },\n      { nom: 'Nutrition and Food Security', poids: 35, seuil_min_pct: 25 },\n      { nom: 'Renewable Natural Resources Asset Management', poids: 25, seuil_min_pct: 30 },\n      { nom: 'Water Resource Management', poids: 15, seuil_min_pct: 40 }\n    ]\n  },\n  environnement: {\n    label: 'Environnement & Ressources Naturelles',\n    secteurs: [\n      { nom: 'Other Water Supply, Sanitation and Waste Management', poids: 40 },\n      { nom: 'Public Administration - Water, Sanitation and Waste Management', poids: 35 }\n    ],\n    themes_niveau1: [\n      { nom: 'Environment and Natural Resource Management', poids: 60, seuil_min_pct: 30 }\n    ],\n    sous_themes: [\n      { nom: 'Renewable Natural Resources Asset Management', poids: 45, seuil_min_pct: 25 },\n      { nom: 'Climate change', poids: 40, seuil_min_pct: 25 },\n      { nom: 'Disaster Risk Management', poids: 25, seuil_min_pct: 25 },\n      { nom: 'Water Resource Management', poids: 20, seuil_min_pct: 30 }\n    ]\n  },\n  energy: {\n    label: 'Energie',\n    secteurs: [\n      { nom: 'Energy Transmission and Distribution', poids: 65 },\n      { nom: 'Oil and Gas', poids: 50 }\n    ],\n    themes_niveau1: [\n      { nom: 'Environment and Natural Resource Management', poids: 30, seuil_min_pct: 40 },\n      { nom: 'Private Sector Development', poids: 20, seuil_min_pct: 50 }\n    ],\n    sous_themes: [\n      { nom: 'Energy', poids: 60, seuil_min_pct: 30 },\n      { nom: 'Renewable Natural Resources Asset Management', poids: 30, seuil_min_pct: 30 },\n      { nom: 'Climate change', poids: 15, seuil_min_pct: 30 }\n    ]\n  },\n  eau: {\n    label: 'Eau & Assainissement',\n    secteurs: [\n      { nom: 'Water Supply', poids: 65 },\n      { nom: 'Sanitation', poids: 55 },\n      { nom: 'Other Water Supply, Sanitation and Waste Management', poids: 50 },\n      { nom: 'Irrigation and Drainage', poids: 40 }\n    ],\n    themes_niveau1: [\n      { nom: 'Urban and Rural Development', poids: 30, seuil_min_pct: 50 },\n      { nom: 'Environment and Natural Resource Management', poids: 25, seuil_min_pct: 30 }\n    ],\n    sous_themes: [\n      { nom: 'Water Resource Management', poids: 55, seuil_min_pct: 25 },\n      { nom: 'Disaster Risk Management', poids: 25, seuil_min_pct: 25 },\n      { nom: 'Rural Development', poids: 15, seuil_min_pct: 40 }\n    ]\n  }\n};\n\nconst criteria = MAPPINGS[thematique] || MAPPINGS['agro'];\n\nreturn {\n  json: {\n    criteria,\n    thematique,\n    pays: config.pays,\n    top_local: config.top_local,\n    top_regional: config.top_regional,\n    top_international: config.top_international,\n    annees: config.annees,\n    seuil_projet: config.seuil_projet,\n    sheet_id: config.sheet_id\n  }\n};"
+      },
+      "id": "b340b102-9333-4947-9358-a5b19844ee2f",
+      "name": "Mapping Thématique",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1RDk6RzU6WQJXSlz1_SdDz57BsioO3O0UTbyarVDDJig",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1974933814,
+          "mode": "list",
+          "cachedResultName": "WB_Projects",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RDk6RzU6WQJXSlz1_SdDz57BsioO3O0UTbyarVDDJig/edit#gid=1974933814"
+        },
+        "options": {}
+      },
+      "id": "0c92cc42-1c0f-45f9-b6f3-0ebed9f707ec",
+      "name": "Lire WB_Projects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        656
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1RDk6RzU6WQJXSlz1_SdDz57BsioO3O0UTbyarVDDJig",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 185302882,
+          "mode": "list",
+          "cachedResultName": "Members",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RDk6RzU6WQJXSlz1_SdDz57BsioO3O0UTbyarVDDJig/edit#gid=185302882"
+        },
+        "options": {}
+      },
+      "id": "3f878843-a9ec-43c0-99b5-05cf8404bb1e",
+      "name": "Lire Members",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        816
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1RDk6RzU6WQJXSlz1_SdDz57BsioO3O0UTbyarVDDJig",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 83656703,
+          "mode": "list",
+          "cachedResultName": "WB_Awards",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RDk6RzU6WQJXSlz1_SdDz57BsioO3O0UTbyarVDDJig/edit#gid=83656703"
+        },
+        "options": {}
+      },
+      "id": "8e1e2cff-a724-4656-a3cc-21a75684595e",
+      "name": "Lire WB_Awards",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        976
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const criteriaItem = $('Mapping Thématique').first().json;\nconst criteria = criteriaItem.criteria;\nconst pays = criteriaItem.pays;\nconst annees = criteriaItem.annees || 3;\nconst seuilProjet = criteriaItem.seuil_projet || 55;\nconst topLocal = criteriaItem.top_local || 30;\nconst topRegional = criteriaItem.top_regional || 20;\nconst topIntl = criteriaItem.top_international || 10;\nconst thematique = criteriaItem.thematique;\nconst sheetId = criteriaItem.sheet_id;\n\nconst projects = $('Lire WB_Projects').all().map(i => i.json);\nconst members = $('Lire Members').all().map(i => i.json);\nconst awards = $('Lire WB_Awards').all().map(i => i.json);\n\n// ── Corrections manuelles ──\nconst corrections = $('Lire Corrections').all().map(i => i.json);\nconst forceExclude = new Set(corrections.filter(c => c.Action === 'force_exclude').map(c => String(c.Nom || '').trim()));\nconst forceCompany = new Set(corrections.filter(c => c.Action === 'force_company').map(c => String(c.Nom || '').trim()));\nconst forceExpert  = new Set(corrections.filter(c => c.Action === 'force_expert').map(c => String(c.Nom || '').trim()));\n\n// ── Mapping tags par thématique ──\nconst TAG_WEIGHTS = {\n  agro:          { agro: 30, consulting: 10, env: 10 },\n  environnement: { env: 30, consulting: 10, agro: 10 },\n  energy:        { energy: 30, consulting: 10, env: 10 },\n  eau:           { env: 20, infra: 20, consulting: 10 },\n  infra:         { infra: 30, consulting: 10, energy: 10 },\n};\nconst tagWeights = TAG_WEIGHTS[thematique] || TAG_WEIGHTS['agro'];\nconst primaryTag = Object.entries(tagWeights).sort((a,b) => b[1] - a[1])[0][0];\n\n// ── Score thématique projet ──\nfunction parsePct(text, theme) {\n  if (!text) return 0;\n  const re = new RegExp(theme.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '\\\\s*\\\\((\\\\d+)%\\\\)');\n  const m = String(text).match(re);\n  return m ? parseInt(m[1]) : 0;\n}\n\nfunction scoreProject(project) {\n  let score = 0;\n  const sector = String(project.sector_primary || '').toLowerCase();\n  const themesAll = String(project.themes_all || '');\n  const subThemes = String(project.sub_themes || '');\n  for (const s of (criteria.secteurs || [])) {\n    if (sector.includes(s.nom.toLowerCase())) { score += s.poids; break; }\n  }\n  for (const t of (criteria.themes_niveau1 || [])) {\n    const pct = parsePct(themesAll, t.nom);\n    if (pct >= (t.seuil_min_pct || 0)) score += Math.round(t.poids * pct / 100);\n  }\n  for (const s of (criteria.sous_themes || [])) {\n    const pct = parsePct(subThemes, s.nom);\n    if (pct >= (s.seuil_min_pct || 0)) score += Math.round(s.poids * pct / 100);\n  }\n  return Math.min(score, 100);\n}\n\nconst projectScores = {};\nfor (const p of projects) projectScores[p.project_id] = scoreProject(p);\n\nconst relevantProjectIds = new Set(\n  Object.entries(projectScores).filter(([,s]) => s >= seuilProjet).map(([id]) => id)\n);\n\nconst retainedProjects = projects\n  .filter(p => relevantProjectIds.has(p.project_id))\n  .map(p => ({ name: p.project_name, id: p.project_id, score: projectScores[p.project_id] }))\n  .sort((a,b) => b.score - a.score);\n\nconst cutoffDate = new Date();\ncutoffDate.setFullYear(cutoffDate.getFullYear() - annees);\n\nconst awardsMap = {};\nfor (const a of awards) awardsMap[a.award_id] = a;\n\nconst relevantAwardIds = new Set(\n  awards.filter(a =>\n    a.place_of_performance === pays &&\n    relevantProjectIds.has(a.project_id) &&\n    new Date(a.publication_date) >= cutoffDate &&\n    String(a.cpv_category).toLowerCase() === 'consulting'\n  ).map(a => a.award_id)\n);\n\n// ── Détection personne physique ──\nconst CORPORATE_WORDS = [\n  'sarl','sas','eurl','ltd','llc','inc','gmbh','spa','suarl',\n  'cabinet','consulting','conseil','consult',\n  'group','groupe','ong','ngo','association','fondation',\n  'bureau','agence','agency','institute','institut',\n  'company','entreprise','firm',\n  'ingenierie','ingenerie','engineering','ingenieurs','ingénieurs',\n  'international','africa','afrique','global',\n  'services','service','solutions','solution',\n  'management','development','développement',\n  'environnement','environment','technologie','technology','tech',\n  'centre','center','partners','advisory','capital','holding',\n  'avocats','worldwide','wolrdwide','limited','network',\n  'organisation','organization',\n  'energie','energy','ecopop','sahel',\n  'veolia','thornton','haskoning','artelia','antea','seureca',\n  'transcom','hannon','sofreco','ginger','sgi','tractebel',\n  'idev','hydroconseil','studi','nodalis','comete',\n  'luxembourg','terre','ocean','tpa','ifc','berd','pmu',\n  'senegal','sénégal','mali','togo','niger','guinee','guinea',\n  'taylor','wessing','setec','motion','zoom','hydro',\n  'ums','aps','bceao','brvm','cira','ccadd','gtah',\n  'egis','transport','villes','routes',\n  'forvis','mazars','deloitte','pwc','kpmg','ernst',\n  'ccm','brl','iram','gfa','niras','helvetas','sweco',\n];\n\nfunction toTitleCase(str) {\n  return str.trim().toLowerCase().replace(/(?:^|\\s)\\S/g, c => c.toUpperCase());\n}\n\nfunction isPhysicalPerson(name) {\n  if (!name) return false;\n  const nl = name.toLowerCase().trim();\n  if (CORPORATE_WORDS.some(w => nl.includes(w))) return false;\n  if (/\\d/.test(name)) return false;\n  if (/[&+\\/\\(\\)\\.\\,\\_\\@\\#]/.test(name)) return false;\n  const wordsRaw = name.trim().split(/\\s+/);\n  const allCaps = wordsRaw.every(w => w === w.toUpperCase() && w.length <= 4);\n  if (allCaps && wordsRaw.length <= 2) return false;\n  const normalized = toTitleCase(name);\n  const words = normalized.split(/\\s+/);\n  if (words.length < 2 || words.length > 5) return false;\n  for (const w of words) {\n    if (!/^[A-ZÀÂÄÉÈÊËÎÏÔÙÛÜÇ][a-zA-ZàâäéèêëîïôùûüçÀÂÄÉÈÊËÎÏÔÙÛÜÇ'\\-]+$/.test(w)) return false;\n    if (w.length < 2) return false;\n  }\n  return true;\n}\n\nfunction isNGO(name) {\n  if (!name) return false;\n  const nl = name.toLowerCase();\n  return /\\bong\\b|\\bngo\\b|^ong |^ngo | ong$| ngo$|association|fondation|réseau|reseau|\\baid\\b|secours|relief|\\bcare\\b|oxfam|world.vision|croix.rouge|sans.fronti/.test(nl);\n}\n\n// ── Zones ──\nconst PAYS_NAMES = { 'SN': 'Senegal', 'CI': \"Cote d'Ivoire\", 'BF': 'Burkina Faso', 'ML': 'Mali', 'TG': 'Togo', 'BJ': 'Benin', 'NE': 'Niger', 'GN': 'Guinea', 'MR': 'Mauritania', 'GH': 'Ghana' };\nconst paysName = PAYS_NAMES[pays] || pays;\nconst AFRIQUE_ALL = ['Mali','Togo','Benin','Guinea','Burkina Faso',\"Cote d'Ivoire\",'Niger','Mauritania','Ghana','Gambia','Guinea-Bissau','Sierra Leone','Liberia','Senegal','Morocco','Tunisia','Algeria','South Africa','Cameroon','Ethiopia','Kenya','Rwanda','Madagascar','Nigeria','Tanzania','Angola','Gabon','Chad','Uganda','Egypt'];\n\nfunction normalizeCountry(str) {\n  return str.trim().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\n}\n\nfunction classifyZone(country) {\n  if (!country) return 'unknown';\n  const c = normalizeCountry(country);\n  const paysNorm = normalizeCountry(paysName);\n  const afriqueNorm = AFRIQUE_ALL.map(normalizeCountry);\n  if (c === paysNorm) return 'local';\n  if (afriqueNorm.includes(c)) return 'regional';\n  return 'international';\n}\n\n// ── Fonction score tag ──\nfunction scoreTag(grp) {\n  let score = 0;\n  for (const m of grp) {\n    const a = awardsMap[m.award_id];\n    if (!a) continue;\n    const tags = String(a.tags || '').toLowerCase().split(',').map(t => t.trim());\n    for (const tag of tags) {\n      if (tagWeights[tag]) score += tagWeights[tag];\n    }\n  }\n  return Math.min(score, 50); // plafond 50\n}\n\n// ── Scoring membres ──\nconst now = new Date();\nconst memberGroups = {};\nfor (const m of members) {\n  if (!relevantAwardIds.has(m.award_id)) continue;\n  if (String(m.member_name || '').match(/^GROUPEMENT\\s+/i)) continue;\n  const name = m.member_name;\n  if (!name) continue;\n  if (!memberGroups[name]) memberGroups[name] = [];\n  memberGroups[name].push(m);\n}\n\nconst scored = [];\nconst experts = [];\n\nfor (const [name, grp] of Object.entries(memberGroups)) {\n\n  if (forceExclude.has(name)) continue;\n\n  if (forceExpert.has(name)) {\n    for (const m of grp) {\n      const a = awardsMap[m.award_id];\n      if (!a) continue;\n      experts.push({ expert: name, pays_expert: m.member_country || '', date_award: a.publication_date || '', mission: a.title || '', valeur: a.award_value ? `${parseFloat(a.award_value).toLocaleString('fr-FR')} ${a.currency}` : 'N/A', projet_bm: a.buyer_name || '', methode: a.procurement_method || '', url: a.source_url || '' });\n    }\n    continue;\n  }\n\n  const treatAsCompany = forceCompany.has(name);\n\n  if (!treatAsCompany && isPhysicalPerson(name)) {\n    for (const m of grp) {\n      const a = awardsMap[m.award_id];\n      if (!a) continue;\n      experts.push({ expert: name, pays_expert: m.member_country || '', date_award: a.publication_date || '', mission: a.title || '', valeur: a.award_value ? `${parseFloat(a.award_value).toLocaleString('fr-FR')} ${a.currency}` : 'N/A', projet_bm: a.buyer_name || '', methode: a.procurement_method || '', url: a.source_url || '' });\n    }\n    continue;\n  }\n\n  if (!treatAsCompany && isNGO(name)) continue;\n\n  // ── Filtre éligibilité — au moins 1 award avec le tag principal ──\n  const hasPrimaryTag = grp.some(m => {\n    const a = awardsMap[m.award_id];\n    if (!a) return false;\n    const tags = String(a.tags || '').toLowerCase().split(',').map(t => t.trim());\n    return tags.includes(primaryTag);\n  });\n  if (!hasPrimaryTag) continue;\n\n  // ── Scoring société ──\n  const zone = classifyZone(grp[0].member_country);\n  const nAwards = grp.length;\n  const dates = grp.map(m => new Date(m.publication_date)).filter(d => !isNaN(d));\n  const lastAward = dates.length ? new Date(Math.max(...dates)) : null;\n  const daysSince = lastAward ? (now - lastAward) / 86400000 : 9999;\n\n  let recency = 1;\n  if (daysSince <= 180) recency = 10;\n  else if (daysSince <= 365) recency = 7;\n  else if (daysSince <= 730) recency = 4;\n\n  const nProjects = new Set(grp.map(m => m.project_id)).size;\n  const volume = Math.min(nProjects * 5 + nAwards * 2, 20);\n  const nLocal = grp.filter(m => m.place_of_performance === pays).length;\n  const geo = Math.min(nLocal * 4, 20);\n  const scoreTagVal = scoreTag(grp);\n  const scoreTotal = recency + volume + geo + scoreTagVal;\n  const country = grp[0].member_country || '';\n\n  const linkedAwards = grp\n    .map(m => awardsMap[m.award_id]).filter(Boolean)\n    .sort((a,b) => new Date(b.publication_date) - new Date(a.publication_date))\n    .slice(0, 3);\n\n  const justification = linkedAwards.map(a => {\n    return `[${a.publication_date?.substring(0,7)}] ${String(a.title)}`;\n  }).join(' | ');\n\n  const urls = linkedAwards.map(a => a.source_url).filter(Boolean).join(' | ');\n\n  scored.push({ bucket: zone.toUpperCase(), societe: name, pays: country, score_total: scoreTotal, score_recence: recency, score_volume: volume, score_geo: geo, score_tag: scoreTagVal, nb_awards: nAwards, nb_projets: nProjects, dernier_award: lastAward ? lastAward.toISOString().substring(0,7) : 'N/A', justification, urls });\n}\n\n// ── Top N par bucket ──\nconst bucketLimits = { LOCAL: topLocal, REGIONAL: topRegional, INTERNATIONAL: topIntl };\nconst bucketOrder = { LOCAL: 0, REGIONAL: 1, INTERNATIONAL: 2 };\nconst bucketCount = {};\nconst scoredSorted = scored.sort((a,b) => {\n  if (a.bucket !== b.bucket) return bucketOrder[a.bucket] - bucketOrder[b.bucket];\n  return b.score_total - a.score_total;\n});\nconst scoringRows = [];\nfor (const row of scoredSorted) {\n  const limit = bucketLimits[row.bucket] || 10;\n  bucketCount[row.bucket] = (bucketCount[row.bucket] || 0) + 1;\n  if (bucketCount[row.bucket] <= limit) scoringRows.push(row);\n}\n\nconst runDate = new Date().toISOString().substring(0,10);\nconst stats = {\n  total_local: scoredSorted.filter(r => r.bucket === 'LOCAL').length,\n  total_regional: scoredSorted.filter(r => r.bucket === 'REGIONAL').length,\n  total_international: scoredSorted.filter(r => r.bucket === 'INTERNATIONAL').length,\n  retained_local: scoringRows.filter(r => r.bucket === 'LOCAL').length,\n  retained_regional: scoringRows.filter(r => r.bucket === 'REGIONAL').length,\n  retained_international: scoringRows.filter(r => r.bucket === 'INTERNATIONAL').length,\n  experts: experts.length\n};\n\nreturn [{ json: { scoring_rows: scoringRows, experts_rows: experts, sheet_id: sheetId, thematique, thematique_label: criteria.label, pays, run_date: runDate, stats, retained_projects: retainedProjects } }];"
+      },
+      "id": "25cf8537-8d53-4009-877e-0d0ced8c806d",
+      "name": "Scorer & Filtrer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Scoring",
+          "mode": "name"
+        },
+        "keepFirstRow": true
+      },
+      "id": "b40b7a50-07d6-4be6-b7ef-e5d28214f158",
+      "name": "Vider Scoring",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -64,
+        704
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Experts",
+          "mode": "name"
+        },
+        "keepFirstRow": true
+      },
+      "id": "f3a9e73f-6750-404d-9719-8b7816e3e586",
+      "name": "Vider Experts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -64,
+        832
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Résumé",
+          "mode": "name"
+        },
+        "keepFirstRow": true
+      },
+      "id": "ff66acb4-37ed-4e14-8453-f7d390d996c8",
+      "name": "Vider Résumé",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -64,
+        976
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Scoring",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Bucket": "={{ $json.Bucket }}",
+            "Société": "={{ $json['Société'] }}",
+            "Pays": "={{ $json.Pays }}",
+            "Score Total": "={{ $json.Score_Total }}",
+            "Récence": "={{ $json['Récence'] }}",
+            "Volume": "={{ $json.Volume }}",
+            "Géo": "={{ $json['Géo'] }}",
+            "Nb Awards": "={{ $json.Nb_Awards }}",
+            "Nb Projets": "={{ $json.Nb_Projets }}",
+            "Dernier Award": "={{ $json.Dernier_Award }}",
+            "Justification (top 3 awards)": "={{ $json.Justification }}",
+            "URLs": "={{ $json.URLs }}",
+            "Score Tag": "={{ $json.Score_Tag }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Bucket",
+              "displayName": "Bucket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Société",
+              "displayName": "Société",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pays",
+              "displayName": "Pays",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score Total",
+              "displayName": "Score Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score Tag",
+              "displayName": "Score Tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Récence",
+              "displayName": "Récence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Volume",
+              "displayName": "Volume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Géo",
+              "displayName": "Géo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nb Awards",
+              "displayName": "Nb Awards",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nb Projets",
+              "displayName": "Nb Projets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dernier Award",
+              "displayName": "Dernier Award",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Justification (top 3 awards)",
+              "displayName": "Justification (top 3 awards)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "URLs",
+              "displayName": "URLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "aa2bea17-e45d-4d3c-9b15-821075d9b0ec",
+      "name": "Écrire Scoring",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        384,
+        704
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Experts",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Expert": "={{ $json.Expert }}",
+            "Pays": "={{ $json.Pays }}",
+            "Date Award": "={{ $json.Date_Award }}",
+            "Mission": "={{ $json.Mission }}",
+            "Valeur": "={{ $json.Valeur }}",
+            "Projet BM": "={{ $json.Projet_BM }}",
+            "Méthode": "={{ $json['Méthode'] }}",
+            "URL": "={{ $json.URL }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Expert",
+              "displayName": "Expert",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pays",
+              "displayName": "Pays",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date Award",
+              "displayName": "Date Award",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mission",
+              "displayName": "Mission",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Valeur",
+              "displayName": "Valeur",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Projet BM",
+              "displayName": "Projet BM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Méthode",
+              "displayName": "Méthode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "567f5884-d7ff-4f73-98de-26f7d66308c8",
+      "name": "Écrire Experts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        384,
+        832
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "=1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Résumé",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Paramètre": "={{ $json['Paramètre'] }}",
+            "Valeur": "={{ $json.Valeur }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Paramètre",
+              "displayName": "Paramètre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Valeur",
+              "displayName": "Valeur",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "9a146510-3444-4689-acba-b80a6e28f6b6",
+      "name": "Écrire Résumé",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        384,
+        976
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -464,
+        816
+      ],
+      "id": "8b3723bd-c869-4ccc-9f4f-f042bfbb5825",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Scorer & Filtrer').first().json;\nreturn data.scoring_rows.map(r => ({ json: {\n  Bucket: r.bucket,\n  Société: r.societe,\n  Pays: r.pays,\n  Score_Total: r.score_total,\n  Score_Tag : r.score_tag,\n  Récence: r.score_recence,\n  Volume: r.score_volume,\n  Géo: r.score_geo,\n  Nb_Awards: r.nb_awards,\n  Nb_Projets: r.nb_projets,\n  Dernier_Award: r.dernier_award,\n  Justification: r.justification,\n  URLs: r.urls\n}}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        704
+      ],
+      "id": "ce4e5b75-69db-46b2-b417-f22e2230db03",
+      "name": "Préparer Scoring"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Scorer & Filtrer').first().json;\nreturn data.experts_rows.map(r => ({ json: {\n  Expert: r.expert,\n  Pays: r.pays_expert,\n  Date_Award: r.date_award,\n  Mission: r.mission,\n  Valeur: r.valeur,\n  Projet_BM: r.projet_bm,\n  Méthode: r.methode,\n  URL: r.url\n}}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        832
+      ],
+      "id": "61f3136e-19c8-4c8a-ae6e-a6d4909fefaf",
+      "name": "Préparer Experts"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Scorer & Filtrer').first().json;\nconst s = data.stats;\nconst rows = [\n  { Paramètre: 'Thématique', Valeur: `${data.thematique} — ${data.thematique_label}` },\n  { Paramètre: 'Pays', Valeur: data.pays },\n  { Paramètre: 'Date run', Valeur: data.run_date },\n  { Paramètre: '', Valeur: '' },\n  { Paramètre: 'LOCAL trouvées', Valeur: s.total_local },\n  { Paramètre: 'LOCAL retenues', Valeur: s.retained_local },\n  { Paramètre: 'RÉGIONAL trouvées', Valeur: s.total_regional },\n  { Paramètre: 'RÉGIONAL retenues', Valeur: s.retained_regional },\n  { Paramètre: 'INTERNATIONAL trouvées', Valeur: s.total_international },\n  { Paramètre: 'INTERNATIONAL retenues', Valeur: s.retained_international },\n  { Paramètre: 'Experts', Valeur: s.experts },\n  { Paramètre: '', Valeur: '' },\n  { Paramètre: 'PROJETS BM RETENUS', Valeur: '' },\n];\nfor (const p of (data.retained_projects || []).slice(0,10)) {\n  rows.push({ Paramètre: p.id, Valeur: `${p.name} (score: ${p.score})` });\n}\nreturn rows.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        976
+      ],
+      "id": "28b1ef98-a41e-4af6-b6f2-01590a7ab6ec",
+      "name": "Préparer Résumé"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1105452077,
+          "mode": "list",
+          "cachedResultName": "Corrections",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EzlaAHzbrcLuEISfwPUn66UtknuAONK1YBF5Iw1BS7o/edit#gid=1105452077"
+        },
+        "options": {}
+      },
+      "id": "eef21a1c-3ae1-4429-bc52-11705cf9ef81",
+      "name": "Lire Corrections",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        1152
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "g9Hi58IPdo95t2xi",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wf2-agrer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1328,
+        816
+      ],
+      "id": "f6776523-9216-4f72-8c5b-0d72db5ef781",
+      "name": "Webhook",
+      "webhookId": "f4b2bf2a-3552-48ff-aa27-bcc26521c762"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "PNuFQNyyO33kTMbo",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/PNuFQNyyO33kTMbo",
+          "cachedResultName": "AGRER — WF3 Analyse Approfondie"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "champ_libre": "={{$('Config Query').first().json.champ_libre}}",
+            "top_local_rapport": "={{$('Config Query').first().json.top_local_rapport}}",
+            "top_regional_rapport": "={{$('Config Query').first().json.top_regional_rapport}}",
+            "top_international_rapport": "={{$('Config Query').first().json.top_international_rapport}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "champ_libre",
+              "displayName": "champ_libre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "top_local_rapport",
+              "displayName": "top_local_rapport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "top_regional_rapport",
+              "displayName": "top_regional_rapport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "top_international_rapport",
+              "displayName": "top_international_rapport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        960
+      ],
+      "id": "3c9f59e2-02d2-4bf5-a3fe-511ab36ec989",
+      "name": "Call 'AGRER — WF3 Analyse Approfondie'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        []
+      ]
+    },
+    "Config Query": {
+      "main": [
+        [
+          {
+            "node": "Mapping Thématique",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapping Thématique": {
+      "main": [
+        [
+          {
+            "node": "Lire WB_Projects",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lire Members",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lire WB_Awards",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lire Corrections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire WB_Projects": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Members": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Lire WB_Awards": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Scorer & Filtrer": {
+      "main": [
+        [
+          {
+            "node": "Vider Scoring",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Vider Experts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Vider Résumé",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vider Scoring": {
+      "main": [
+        [
+          {
+            "node": "Préparer Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vider Experts": {
+      "main": [
+        [
+          {
+            "node": "Préparer Experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vider Résumé": {
+      "main": [
+        [
+          {
+            "node": "Préparer Résumé",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Scorer & Filtrer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Scoring": {
+      "main": [
+        [
+          {
+            "node": "Écrire Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Experts": {
+      "main": [
+        [
+          {
+            "node": "Écrire Experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Résumé": {
+      "main": [
+        [
+          {
+            "node": "Écrire Résumé",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Corrections": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Config Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Écrire Résumé": {
+      "main": [
+        [
+          {
+            "node": "Call 'AGRER — WF3 Analyse Approfondie'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "24c1c9b4-2c8a-4773-a2c6-01ba61787745",
+  "meta": {
+    "instanceId": "300ae4119235cd9a4c0fd592eba274645bf15041b2d9aacd2d53bcb0b855baee"
+  },
+  "id": "sWkA0zzZNJEUGppj",
+  "tags": []
+}
