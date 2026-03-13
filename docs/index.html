@@ -19,6 +19,7 @@
     --text:     #2C3E50;
     --muted:    #7F8C8D;
     --radius:   12px;
+    --accent:   #1A2E3B;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,7 +70,7 @@
   /* ── MAIN ── */
   main {
     flex: 1;
-    max-width: 720px;
+    max-width: 760px;
     margin: 48px auto;
     padding: 0 24px;
     width: 100%;
@@ -150,7 +151,6 @@
     border-color: var(--dark);
   }
 
-  /* ── TEXTAREA ── */
   textarea {
     resize: vertical;
     min-height: 160px;
@@ -162,14 +162,115 @@
     margin-top: 6px;
   }
 
+  /* ── VIGNETTES ── */
+  .vignettes-section {
+    margin-bottom: 24px;
+  }
+
+  .vignettes-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .vignettes-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .vignettes-group-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+  .vignettes-group-title:first-of-type {
+    margin-top: 0;
+  }
+
+  .vignettes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .vignette {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    line-height: 1.3;
+  }
+
+  .vignette:hover {
+    border-color: var(--dark);
+    color: var(--dark);
+    background: #f8f9fa;
+  }
+
+  .vignette.selected {
+    background: var(--dark);
+    border-color: var(--dark);
+    color: #fff;
+  }
+
+  .vignette.selected .vignette-check {
+    display: inline;
+  }
+  .vignette-check {
+    display: none;
+    font-size: 10px;
+  }
+
+  /* Secteurs — couleur différente */
+  .vignette.secteur.selected {
+    background: #1A2E3B;
+    border-color: #1A2E3B;
+  }
+
+  /* Sous-thèmes — accent légèrement différent */
+  .vignette.sous-theme.selected {
+    background: #1565C0;
+    border-color: #1565C0;
+  }
+
+  .selection-count {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .selection-count span {
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .vignettes-error {
+    font-size: 12px;
+    color: #C62828;
+    margin-top: 8px;
+    display: none;
+  }
+
   /* ── NUMBER INPUTS GRID ── */
   .numbers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
   }
-
-  .number-item {}
 
   .number-label {
     font-size: 12px;
@@ -191,9 +292,7 @@
     -moz-appearance: textfield;
   }
   input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    opacity: 1;
-  }
+  input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   input[type="number"].local    { color: var(--local);    border-color: #BBDEFB; }
   input[type="number"].regional { color: var(--regional); border-color: #E1BEE7; }
   input[type="number"].intl     { color: var(--intl);     border-color: #FFCCBC; }
@@ -246,28 +345,16 @@
     display: none;
   }
   #status.loading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #EEF4FF;
-    color: var(--local);
-    border: 1px solid #BBDEFB;
+    display: flex; align-items: center; gap: 12px;
+    background: #EEF4FF; color: var(--local); border: 1px solid #BBDEFB;
   }
   #status.success {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #E8F5E9;
-    color: var(--green);
-    border: 1px solid #C8E6C9;
+    display: flex; align-items: center; gap: 12px;
+    background: #E8F5E9; color: var(--green); border: 1px solid #C8E6C9;
   }
   #status.error {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #FFEBEE;
-    color: #C62828;
-    border: 1px solid #FFCDD2;
+    display: flex; align-items: center; gap: 12px;
+    background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2;
   }
 
   .spinner {
@@ -279,7 +366,6 @@
     flex-shrink: 0;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .status-icon { font-size: 18px; flex-shrink: 0; }
 
   /* ── FOOTER ── */
@@ -331,17 +417,6 @@
       </div>
 
       <div class="field">
-        <label for="thematique">Thématique principale</label>
-        <select id="thematique" name="thematique" required>
-          <option value="" disabled selected>Sélectionner une thématique…</option>
-          <option value="agro">Agriculture</option>
-          <option value="env">Environnement</option>
-          <option value="energy">Énergie</option>
-          <option value="eau">Eau</option>
-        </select>
-      </div>
-
-      <div class="field">
         <label for="champ_libre">
           Description de la mission
           <span style="color:var(--muted);font-weight:400">(champ libre)</span>
@@ -352,33 +427,61 @@
           placeholder="Décris ici le contexte de l'AO, les composantes, les types de missions recherchées, le profil partenaire souhaité…&#10;&#10;Ex : L'État du Sénégal cherche un cabinet pour la supervision des travaux hydrauliques dans le cadre du projet Nanija-Bolong…"
           required
         ></textarea>
-        <div class="textarea-hint">💡 Plus le contexte est précis, plus l'analyse sera pertinente. Utilisez Entrée pour les sauts de ligne.</div>
+        <div class="textarea-hint">💡 Plus le contexte est précis, plus l'analyse sera pertinente.</div>
+      </div>
+    </div>
+
+    <!-- Thèmes & Sous-thèmes -->
+    <div class="card">
+      <div class="card-title">Thématiques Banque Mondiale</div>
+
+      <div class="vignettes-section">
+        <div class="vignettes-label">Secteurs <span style="color:var(--muted);font-weight:400;font-size:12px">(niveau 1)</span></div>
+        <div class="vignettes-hint">Sélectionne les secteurs pertinents pour cet AO</div>
+        <div class="vignettes-grid" id="secteurs-grid">
+          <!-- générés par JS -->
+        </div>
+      </div>
+
+      <div class="vignettes-section" style="margin-bottom:0">
+        <div class="vignettes-label">Sous-thèmes <span style="color:var(--muted);font-weight:400;font-size:12px">(niveau 2)</span></div>
+        <div class="vignettes-hint">Sélectionne les sous-thèmes les plus pertinents</div>
+        <div class="vignettes-grid" id="sous-themes-grid"></div>
+
+        <div id="autres-section" style="display:none;margin-top:12px">
+          <div class="vignettes-group-title" style="margin-top:0;margin-bottom:8px">Autres</div>
+          <div class="vignettes-grid" id="sous-themes-autres-grid"></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <span id="toggle-autres" style="font-size:12px;color:var(--local);cursor:pointer;font-weight:500;user-select:none">+ Autres sous-thèmes</span>
+        </div>
+      </div>
+
+      <div class="vignettes-error" id="vignettes-error">⚠ Sélectionne au moins un secteur ou sous-thème pour lancer l'analyse.</div>
+
+      <div class="selection-count" id="selection-count" style="margin-top:14px">
+        <span id="count-secteurs">0</span> secteur(s) · <span id="count-sous-themes">0</span> sous-thème(s) sélectionné(s)
       </div>
     </div>
 
     <!-- Sélection rapport -->
     <div class="card">
       <div class="card-title">Sociétés dans le rapport final</div>
-
       <div class="numbers-grid">
         <div class="number-item">
           <span class="number-label local">LOCAL</span>
-          <input type="number" class="local" id="top_local" name="top_local_rapport"
-            min="1" max="5" value="5" required>
+          <input type="number" class="local" id="top_local" name="top_local_rapport" min="1" max="5" value="5" required>
           <div class="number-hint">Pays cible</div>
         </div>
-
         <div class="number-item">
           <span class="number-label regional">RÉGIONAL</span>
-          <input type="number" class="regional" id="top_regional" name="top_regional_rapport"
-            min="1" max="5" value="5" required>
+          <input type="number" class="regional" id="top_regional" name="top_regional_rapport" min="1" max="5" value="5" required>
           <div class="number-hint">Zone Afrique de l'Ouest</div>
         </div>
-
         <div class="number-item">
           <span class="number-label intl">INTL</span>
-          <input type="number" class="intl" id="top_intl" name="top_international_rapport"
-            min="1" max="5" value="3" required>
+          <input type="number" class="intl" id="top_intl" name="top_international_rapport" min="1" max="5" value="3" required>
           <div class="number-hint">Hors zone</div>
         </div>
       </div>
@@ -407,6 +510,99 @@
 <footer>AGRER — Usage interne · Partner Intelligence MVP</footer>
 
 <script>
+  // ── Données taxonomie BM ──
+  const SECTEURS = [
+    'Economic Policy',
+    'Environment and Natural Resource Management',
+    'Finance',
+    'Human Development and Gender',
+    'Private Sector Development',
+    'Public Sector Management',
+    'Social Development and Protection',
+    'Urban and Rural Development'
+  ];
+
+  const SOUS_THEMES_AGRER = [
+    'Business Enabling Environment',
+    'Climate change',
+    'Disaster Risk Management',
+    'Economic Growth and Planning',
+    'Energy',
+    'Enterprise Development',
+    'Environmental Health and Pollution Management',
+    'Environmental policies and institutions',
+    'Finance for Development',
+    'Nutrition and Food Security',
+    'Public Administration',
+    'Public Finance Management',
+    'Public Private Partnerships',
+    'Renewable Natural Resources Asset Management',
+    'Rural Development',
+    'Urban Development',
+    'Water Resource Management'
+  ];
+
+  const SOUS_THEMES_AUTRES = [
+    'Data Development and Capacity Building',
+    'Disease Control',
+    'Education',
+    'Financial Infrastructure and Access',
+    'Fiscal Policy',
+    'Fragility Conflict and Violence',
+    'Gender',
+    'Health Systems and Policies',
+    'ICT',
+    'Jobs',
+    'Labor Market Policy and Programs',
+    'Regional Integration',
+    'Road Safety',
+    'Social Inclusion',
+    'Social Protection',
+    'Trade'
+  ];
+
+  // ── Sélections ──
+  const selectedSecteurs = new Set();
+  const selectedSousThemes = new Set();
+
+  function buildVignettes(items, containerId, selectedSet, cssClass) {
+    const grid = document.getElementById(containerId);
+    items.forEach(function(item) {
+      const el = document.createElement('div');
+      el.className = 'vignette ' + cssClass;
+      el.dataset.value = item;
+      el.innerHTML = '<span class="vignette-check">✓</span>' + item;
+      el.addEventListener('click', function() {
+        if (selectedSet.has(item)) {
+          selectedSet.delete(item);
+          el.classList.remove('selected');
+        } else {
+          selectedSet.add(item);
+          el.classList.add('selected');
+        }
+        updateCount();
+      });
+      grid.appendChild(el);
+    });
+  }
+
+  function updateCount() {
+    document.getElementById('count-secteurs').textContent = selectedSecteurs.size;
+    document.getElementById('count-sous-themes').textContent = selectedSousThemes.size;
+  }
+
+  buildVignettes(SECTEURS, 'secteurs-grid', selectedSecteurs, 'secteur');
+  buildVignettes(SOUS_THEMES_AGRER, 'sous-themes-grid', selectedSousThemes, 'sous-theme');
+  buildVignettes(SOUS_THEMES_AUTRES, 'sous-themes-autres-grid', selectedSousThemes, 'sous-theme');
+
+  // Toggle "Autres"
+  document.getElementById('toggle-autres').addEventListener('click', function() {
+    const section = document.getElementById('autres-section');
+    const isVisible = section.style.display !== 'none';
+    section.style.display = isVisible ? 'none' : 'block';
+    this.textContent = isVisible ? '+ Autres sous-thèmes' : '− Autres sous-thèmes';
+  });
+
   // ── Validation inputs numériques ──
   ['top_local', 'top_regional', 'top_intl'].forEach(function(id) {
     var input = document.getElementById(id);
@@ -423,13 +619,21 @@
   document.getElementById('form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    // Validation vignettes
+    if (selectedSecteurs.size === 0 && selectedSousThemes.size === 0) {
+      document.getElementById('vignettes-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('vignettes-error').style.display = 'none';
+
     var btn    = document.getElementById('btn');
     var status = document.getElementById('status');
 
     var payload = {
       pays:                      document.getElementById('pays').value,
-      thematique:                document.getElementById('thematique').value,
       champ_libre:               document.getElementById('champ_libre').value,
+      secteurs:                  Array.from(selectedSecteurs),
+      sous_themes:               Array.from(selectedSousThemes),
       top_local_rapport:         parseInt(document.getElementById('top_local').value),
       top_regional_rapport:      parseInt(document.getElementById('top_regional').value),
       top_international_rapport: parseInt(document.getElementById('top_intl').value),
